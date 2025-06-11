@@ -1,0 +1,805 @@
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador Interactivo de Obras Ecuatorianas para Piano</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 md:p-8 shadow-md">
+        <div class="container mx-auto rounded-xl">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">Explorador de Obras Ecuatorianas para Piano</h1>
+            <p class="text-lg md:text-xl opacity-90">Una herramienta interactiva para estudiantes y profesores de música.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Sección de Filtros -->
+        <section class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Filtrar Obras</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="composer-filter" class="block text-gray-700 font-medium mb-2">Compositor</label>
+                    <select
+                        id="composer-filter"
+                        name="composer"
+                        class="w-full p-3 border border-gray-300 rounded-md bg-gray-50 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    >
+                        <option value="Todos">Todos los Compositores</option>
+                        <!-- Opciones de compositor se generarán con JS -->
+                    </select>
+                </div>
+                <div>
+                    <label for="level-filter" class="block text-gray-700 font-medium mb-2">Nivel de Bachillerato</label>
+                    <select
+                        id="level-filter"
+                        name="level"
+                        class="w-full p-3 border border-gray-300 rounded-md bg-gray-50 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    >
+                        <option value="Todos">Todos los Niveles</option>
+                        <!-- Opciones de nivel se generarán con JS -->
+                    </select>
+                </div>
+                <div>
+                    <label for="genre-filter" class="block text-gray-700 font-medium mb-2">Género Musical</label>
+                    <select
+                        id="genre-filter"
+                        name="genre"
+                        class="w-full p-3 border border-gray-300 rounded-md bg-gray-50 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    >
+                        <option value="Todos">Todos los Géneros</option>
+                        <!-- Opciones de género se generarán con JS -->
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Gráficos -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Análisis Visual del Repertorio</h2>
+            <div class="flex flex-col md:flex-row gap-8 mb-12">
+                <div class="w-full md:w-1/2 bg-white p-6 rounded-xl shadow-lg flex items-center justify-center" style="min-height: 300px;">
+                    <canvas id="difficultyChart"></canvas>
+                </div>
+                <div class="w-full md:w-1/2 bg-white p-6 rounded-xl shadow-lg flex items-center justify-center" style="min-height: 300px;">
+                    <canvas id="genreChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Obras Filtradas -->
+        <section>
+            <h2 id="filtered-works-title" class="text-2xl font-semibold text-gray-700 mb-6">Obras Encontradas (0)</h2>
+            <div id="works-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Las tarjetas de obras se cargarán aquí -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-6 text-center mt-12 rounded-xl">
+        <div class="container mx-auto">
+            <p class="text-sm">© 2024 Explorador de Obras Ecuatorianas para Piano. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Datos consolidados de las obras de piano
+        const ALL_WORKS = [
+            // Obras de Luis Humberto Salgado
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Amanecer de trasnochada",
+                genre: "Yaraví",
+                compass: "¾",
+                tempo: "Lento",
+                tonality: "F minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Control de arpegios rápidos y precisos en tempo lento\n- Ejecución de escalas pentáfonas con claridad y articulación\n- Sonoridad homogénea en block chords\n- Coordinación de manos en texturas densas con octavas y acordes en la mano izquierda",
+                musicalResources: "- Forma breve con introducción, dos secciones y coda\n- Melodía armonizada en la mano derecha (homofonía densa)\n- Arpegios y escalas pentáfonas como recurso técnico y expresivo\n- Acompañamiento rítmico del yaraví enriquecido con octavas y acordes\n- Uso de acordes bloque para reforzar el carácter solemne y nostálgico del yaraví",
+                didacticApplication: "- Ideal para trabajar el equilibrio sonoro entre líneas melódicas y acordes\n- Permite introducir elementos de la pentafonía andina desde una perspectiva técnica\n- Favorece la comprensión estilística del yaraví como forma tradicional lenta y expresiva\n- Enriquece el análisis interpretativo a través del tratamiento armónico, formal y textural del repertorio nacionalista de Salgado"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Romance nativo",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "Allegro moderato",
+                tonality: "G minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Control del ritmo característico del sanjuanito en 2/4\n- Uso de octavas en mano izquierda (requiere independencia y estabilidad)\n- Coordinación entre melodía y acompañamiento\n- Articulación clara en intervalos de terceras y cuartas en la mano derecha",
+                musicalResources: "- Forma: Estribillo - a - b - Estribillo\n- Melodía con acompañamiento rítmico característico del sanjuanito\n- Uso de octavas en la mano izquierda como patrón motívico\n- Homofonía en terceras y cuartas en la sección B\n- Acordes al final de frase como cierre estructural",
+                didacticApplication: "- Excelente para introducir el estilo del sanjuanito desde una estética nacionalista\n- Permite trabajar la precisión rítmica, la independencia de manos y la estructura formal repetitiva\n- Enriquece la sonoridad y el sentido armónico mediante uso de intervalos y acordes reforzados\n- Brinda la posibilidad de reflexionar sobre cómo Salgado estiliza el folclore en una escritura pianística rica pero accesible"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "La trilla",
+                genre: "Danzante",
+                compass: "6/8",
+                tempo: "Allegretto",
+                tonality: "E minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Coordinación entre melodía y acompañamiento con octavas\n- Armonización compleja con intervalos simultáneos (3as, 6tas y octavas)\n- Transición fluida entre E menor y E mayor\n- Control dinámico en acordes de cierre",
+                musicalResources: "- Forma: Intro - A - Puente - B - A - Coda\n- Melodía acompañada con ritmo característico del danzante en 6/8\n- Acompañamiento con octavas en la mano izquierda\n- Homofonía con intervalos armónicos (3ras, 6tas, octavas)\n- Modulación al paralelo mayor en puente y sección B, que mantiene textura, pero con variación tonal\n- Acordes conclusivos como refuerzo estructural",
+                didacticApplication: "- Obra ideal para trabajar modulaciones funcionales y contrastes tonales dentro de una misma forma\n- Aporta herramientas para desarrollar control técnico en compás de subdivisión ternaria\n- Enfatiza el carácter festivo del danzante, útil para diferenciar géneros nacionales\n- Facilita el análisis formal, armónico y expresivo desde una escritura nacionalista avanzada"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "¡Al que no alienta, copa!",
+                genre: "Alza",
+                compass: "6/8",
+                tempo: "Allegro giusto",
+                tonality: "E major",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Melodía en la mano izquierda (requiere independencia y control del fraseo)\n- Acompañamiento con arpegios rítmicos precisos\n- Modulación a tonalidad menor en sección B\n- Armonización de la melodía con acordes simultáneos\n- Claridad en articulación en compás de 6/8 a tempo rápido (Allegro giusto)",
+                musicalResources: "- Forma: Intro - A - B - C - Coda\n- Uso del ritmo característico del alza (ritmo ternario rápido)\n- Melodía en la mano izquierda (intro y A)\n- Acompañamiento con arpegios en ritmo característico\n- Armonización vertical de la melodía con acordes en la mano derecha\n- Modulación a E menor en la sección B, regresando a E mayor en C y la coda",
+                didacticApplication: "- Ideal para trabajar independencia de manos, especialmente cuando la melodía está en la izquierda\n- Refuerza habilidades de lectura y expresión en compases compuestos\n- Favorece el reconocimiento de modulación y retorno tonal dentro de una estructura expandida\n- Excelente para desarrollar interpretación con carácter festivo y rítmico del alza ecuatoriano desde una escritura pianística nacionalista y enérgica"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Criollita presuntuosa",
+                genre: "Albazo",
+                compass: "3/8",
+                tempo: "Allegro mosso",
+                tonality: "C minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Homofonía densa con acordes en bloque como melodía\n- Acompañamiento con octavas rítmicas en compás de 3/8\n- Modulación a Db mayor en la parte B\n- Ejecución de patrones escalísticos pentáfonos con velocidad y precisión\n- Coordinación precisa entre manos en pasajes de textura densa",
+                musicalResources: "- Forma: Intro - a - puente - b - c - a - coda\n- Estilo: albazo, ritmo característico ternario en 3/8\n- Melodía armonizada en bloques verticales (acordes plenos)\n- Acompañamiento en octavas que refuerzan el ritmo del albazo\n- Modulación (cromaticismo funcional) a Db mayor en sección B\n- Uso de escalas pentáfonas y acordes como melodía en la sección C",
+                didacticApplication: "- Permite desarrollar la interpretación pianística con texturas densas y ritmos característicos del albazo\n- Ideal para trabajar la sonoridad compacta y la precisión rítmica\n- Aporta elementos para análisis formal, rítmico y tonal complejo\n- Brinda herramientas para comprender la estilización del folklore en clave moderna y nacionalista, con desafíos técnicos similares a repertorio de concierto latinoamericano"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Nocturnal",
+                genre: "Pasillo",
+                compass: "¾",
+                tempo: "Allegro moderato",
+                tonality: "G minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Control del fraseo expresivo en pasajes melódico-armónicos\n- Coordinación entre melodía y acompañamiento rítmico del pasillo\n- Precisión en acordes de cierre\n- Transición tonal fluida (modulación a Ab mayor en parte C)",
+                musicalResources: "- Forma: Intro - A - B - C - A - Coda\n- Compás de 3/4, estilo de pasillo ecuatoriano\n- Melodía expresiva acompañada por acordes rítmicos\n- Acordes al final de frases como refuerzo estructural\n- Modulación a Ab mayor en la sección C\n- Discurso armónico cuidado, enfocado en el lirismo más que en el virtuosismo",
+                didacticApplication: "- Obra excelente para desarrollar la expresividad interpretativa y el uso del pedal\n- Ideal para análisis formal, armónico y del fraseo propio del pasillo\n- Permite trabajar la construcción de un discurso emocional desde el control técnico moderado\n- Brinda acceso a la música nacionalista desde una escritura más accesible, pero profunda musicalmente"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Ecos del páramo",
+                genre: "Yaraví",
+                compass: "6/8",
+                tempo: "Larghetto",
+                tonality: "D minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Melodía en el registro grave, poco habitual, requiere control del peso y claridad\n- Cruces de manos (LH al registro agudo como contracanto)\n- Coordinación de arpegios y acordes ornamentales en la mano derecha\n- Escalas rápidas como contracantos en parte B\n- Control de fraseo y pedaleo expresivo en tempo lento (Larghetto)",
+                musicalResources: "- Forma: Intro - a - b - c - Coda\n- Estilo: yaraví en 6/8 con carácter introspectivo\n- Melodía en el bajo adornada con texturas arpegiadas\n- Contracantos complejos que implican uso del registro agudo con cruces de manos\n- Uso de octavas en el acompañamiento y de acordes como ornamentación melódica\n- Escalas virtuosas con función expresiva y de contraste",
+                didacticApplication: "- Obra ideal para el desarrollo del fraseo profundo y expresividad estilística del yaraví\n- Brinda desafíos técnicos poco convencionales (melodía en el bajo, cruces de registro)\n- Permite trabajar texturas mixtas y escritura polifónica horizontal en contexto nacionalista\n- Útil para ejercicios de análisis auditivo, formal y estilístico, además de enriquecer el repertorio avanzado ecuatoriano con una obra poética y técnicamente demandante"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Bajando a la feria",
+                genre: "Danzante",
+                compass: "6/8",
+                tempo: "Allegretto",
+                tonality: "Bb major",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Melodía en octavas en la mano derecha con articulación clara\n- Coordinación rítmica en compás de 6/8 con acompañamiento característico en LH\n- Modulación tonal en puente (de Bb a Eb)\n- Pasajes virtuosos con acordes permutados y polifonía melódica en sección C\n- Claridad en fraseo y estructura en una forma extendida",
+                musicalResources: "- Forma: Intro - A - Puente - B - C - Coda\n- Estilo: danzante, con ritmo ternario alegre y constante\n- Melodía en octavas (A), modulaciones estructurales (puente)\n- Sección C con adornos virtuosos y texturas polifónicas\n- Riqueza armónica y tímbrica en cada sección, destacando el carácter festivo del danzante",
+                didacticApplication: "- Ideal para el trabajo de octavas melódicas como recurso expresivo\n- Desarrolla independencia y control rítmico en compás compuesto\n- Enriquece el análisis formal con modulaciones funcionales\n- Permite abordar la polifonía implícita y el uso de ornamentación melódica como elemento técnico y estético\n- Valiosa para consolidar repertorio nacionalista avanzado y preparar obras con exigencias interpretativas integrales"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Noviazgo Indigena",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "Moderato",
+                tonality: "B minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Acompañamiento tipo stride en la mano izquierda (requiere salto rítmico preciso)\n- Ornamentación melódica con arpegios y acordes\n- Modulación a E menor en la sección B\n- Control de articulación y balance entre manos en tempo Allegro Moderato (2/4)",
+                musicalResources: "- Forma: Estribillo - A - Estribillo - B - Estribillo - A\n- Estilo: Sanjuanito con ritmo tradicional, pero con escritura pianística estilizada\n- Melodía adornada con arpegios y acordes finales en RH\n- Acompañamiento tipo stride con alternancia entre bajos y acordes en LH\n- Modulación tonal funcional (B minor → E minor)",
+                didacticApplication: "- Excelente para desarrollar la técnica de salto de mano izquierda (stride), poco frecuente en repertorio nacional\n- Posibilita trabajar coordinación rítmica precisa en tempo rápido\n- Ideal para introducir ornamentaciones melódicas como recurso expresivo\n- Brinda herramientas para el análisis formal y tonal del sanjuanito desde una escritura moderna y estilizada por Salgado"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Arpas y guitarras",
+                genre: "Albazo",
+                compass: "3/8",
+                tempo: "Allegro giusto",
+                tonality: "C# minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Control del ritmo característico del albazo en compás de 3/8\n- Precisión en articulación de pasajes en octavas (parte B)\n- Contraste dinámico entre secciones\n- Ejecución clara en tempo rápido (Allegro giusto) y en la coda (presto)",
+                musicalResources: "- Forma: Estribillo - A - Estribillo - B - Estribillo - B - Coda\n- Repetición temática con variaciones armónicas\n- Ritmo típico del albazo alegre y enérgico\n- Parte B con melodía en octavas que refuerzan el carácter festivo\n- Coda en presto, breve y conclusiva",
+                didacticApplication: "- Útil para trabajar el estilo del albazo con claridad rítmica y energética\n- Ofrece oportunidades para el desarrollo del contraste expresivo entre secciones\n- Ideal para practicar octavas en un contexto musical accesible\n- Permite el análisis de formas cíclicas y el uso del estribillo como recurso estructural"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Entre compadres",
+                genre: "Aire Típico",
+                compass: "6/8",
+                tempo: "Allegro Giocoso",
+                tonality: "F# minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Control rítmico sobre el patrón característico del aire típico en compás compuesto\n- Coordinación entre manos en secciones rápidas\n- Acordes verticales y octavas en el tema B\n- Articulación clara en variaciones rítmicas sucesivas",
+                musicalResources: "- Forma seccional: Estribillo – A – Estribillo – B – C – Coda\n- Ritmo característico del aire típico como base motívica\n- Sección B con recursos climáticos: octavas y acordes marcados\n- Variaciones rítmicas como estrategia de desarrollo temático\n- Coda breve que cierra con energía y reafirma el carácter festivo de la obra",
+                didacticApplication: "- Introduce al estudiante al repertorio nacional estilizado con un enfoque técnico accesible\n- Permite trabajar articulación, ritmo y manejo de acentuaciones sobre patrón binario-compuesto\n- Refuerza la comprensión de formas seccionales con variaciones temáticas\n- Funciona como obra puente entre piezas de iniciación y repertorio nacionalista avanzado de Salgado"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Amores Furtivos",
+                genre: "Pasillo",
+                compass: "¾",
+                tempo: "Moderato",
+                tonality: "E minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Coordinación entre melodía y acompañamiento rítmico característico del pasillo\n- Contrastes métricos y de tempo (Moderato → Allegro → Allegro con vita)\n- Articulación clara en acordes finales en la coda\n- Control dinámico y expresivo de las frases cantábiles",
+                musicalResources: "- Forma: Estribillo - A - B - Estribillo - C - Coda\n- Compás de 3/4 en estilo pasillo ecuatoriano\n- Melodía acompañada, principalmente en la mano derecha\n- Acompañamiento rítmico característico en la mano izquierda\n- Coda con acordes verticales y energía conclusiva\n- Contrastes de tempo como recurso expresivo y estructural",
+                didacticApplication: "- Ideal para trabajar la expresividad melódica en el pasillo nacional\n- Permite abordar la lectura estructurada con atención a los cambios de tempo\n- Brinda herramientas para distinguir secciones temáticas a través del fraseo y carácter\n- Excelente para reforzar el sentido formal y narrativo dentro del repertorio nacionalista con carga afectiva"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Evocación a los espíritus nativos del lago",
+                genre: "Barcarola",
+                compass: "6/8",
+                tempo: "Larghetto quasi Andante cantábile",
+                tonality: "D major",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Control de fraseo en melodías armónicas y acordes expresivos\n- Arpegios virtuosos en LH con cambios métricos\n- Escalas rápidas y acompañamiento arpegiado en tempo grazioso\n- Sextas armónicas, cambios de tempo frecuentes, y equilibrio dinámico entre manos\n- Transiciones fluidas entre secciones contrastantes (Larghetto, Piu mosso, Allegro grazioso, Adagio)",
+                musicalResources: "- Forma: Intro - A - B - Puente - A - Coda\n- Estilo: barcarola con elementos de danzante y aire típico\n- Compás de 6/8 con variaciones métricas\n- Cambios de tonalidad: de D mayor a G menor (parte B)\n- Textura polifónica densa, uso de acordes, arpegios, escalas ornamentales y dinámicas expresivas\n- Coda introspectiva en Adagio con cierre dramático",
+                didacticApplication: "- Ideal para trabajar transiciones de carácter y tempo dentro de una misma obra\n- Fortalece la técnica de arpegios extendidos, escalas rápidas y acordes armónicos\n- Permite análisis formal, rítmico y armónico avanzado en contexto nacionalista\n- Excelente ejemplo de cómo Salgado estiliza el folklore andino mediante el lenguaje pianístico romántico-modernista"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Criollo Sentimental y festivo",
+                genre: "Yaraví y Albazo", // Combinado
+                compass: "6/8",
+                tempo: "Andante sostenuto",
+                tonality: "E minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Acordes extendidos con escritura densa\n- Uso de recursos polifónicos simultáneos\n- Contraste de tempos (Andante sostenuto → Allegro vivo)\n- Coordinación de melodía con acompañamiento en tempo rápido\n- Octavas en la mano derecha con fuerza expresiva en la coda",
+                musicalResources: "- Forma: Estribillo - A - Estribillo - B - C - Coda (estructura extendida)\n- Primera parte en estilo yaraví, lenta y expresiva, con melodía armónica\n- Segunda parte en albazo en E mayor con cambio de carácter, tempo y textura\n- Textura homofónica y polifónica alternada\n- Uso de octavas, acordes, cambios tonales y dinámicos para construir una narrativa contrastante y conclusiva",
+                didacticApplication: "- Obra ideal para estudiar la transformación estilística dentro de una misma pieza\n- Fomenta el análisis interpretativo y técnico de cambios de carácter y tempo\n- Permite trabajar tanto la expresividad melódica como la energía rítmica con recursos pianísticos avanzados\n- Enriquecedora para el desarrollo de una visión integral del repertorio nacional desde la perspectiva de la estilización académica del folklore"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Brindis por la peaña",
+                genre: "Alza",
+                compass: "6/8",
+                tempo: "Allegro Giusto",
+                tonality: "G minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Arpegios veloces en direcciones opuestas entre manos (RH descendente / LH ascendente)\n- Coordinación precisa en pasajes cruzados\n- Modulación a Ab mayor en la parte B\n- Control dinámico de acordes finales de frase\n- Coda con recuperación del tema inicial, requiere memoria estructural y articulación clara",
+                musicalResources: "- Forma: Intro - A - B - A - Coda\n- Estilo: Alza con ritmo energético en 6/8\n- Arpegios en espejo como recurso motívico y técnico\n- Modulación funcional (G minor → Ab major)\n- Reexposición temática y cierre conclusivo\n- Uso de acordes verticales como refuerzo estructural en finales de frase",
+                didacticApplication: "- Obra útil para desarrollar independencia de manos y técnica de arpegio\n- Favorece el análisis formal con elementos de recapitulación y variación tonal\n- Requiere trabajo consciente de la articulación y fraseo en compases rápidos\n- Integra el folclore andino con una escritura pianística moderna de concierto, ideal para fortalecer el repertorio nacionalista de nivel avanzado"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Después de la cosecha",
+                genre: "Danzante",
+                compass: "6/8",
+                tempo: "Allegretto",
+                tonality: "E minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Coordinación entre ritmo característico del danzante en LH y acordes plenos en RH (parte A)\n- Modulación a E mayor en parte B con armonización en intervalos\n- Polifonía melódica con acordes permutados (parte C)\n- Coda energética en octavas que exige control de fuerza, precisión y articulación clara",
+                musicalResources: "- Forma extendida: Estribillo - A - B - C - Estribillo - A1 - B - C - Coda\n- Compás de 6/8 en estilo danzante (alegre y rítmico)\n- Acompañamiento constante en LH con ritmo tradicional\n- Acordes en bloque, arpegios simples y melodía con acompañamiento\n- Polifonía implícita mediante acordes permutados en la mano derecha\n- Coda conclusiva con octavas que retoman la energía del danzante",
+                didacticApplication: "- Excelente para trabajar resistencia técnica y lectura estructural en formas largas\n- Permite afianzar independencia de manos y control de texturas cambiantes\n- Enriquecedora para el estudio de las modulaciones dentro del repertorio nacionalista\n- Aporta elementos interpretativos que combinan estilo tradicional andino con tratamiento pianístico moderno y virtuosístico"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "El pintoresco baile de las cintas",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "Allegro moderato",
+                tonality: "G minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Acordes en bloque en estribillo (requieren precisión rítmica y control sonoro)\n- Melodía con acompañamiento tipo stride (alternancia bajo–acorde en LH)\n- Recursos polifónicos en parte B y arpegios extendidos en ambas manos\n- Uso de acordes para reforzar frases y cierres temáticos",
+                musicalResources: "- Forma: Estribillo - A - Estribillo - B - A1 - Estribillo\n- Estilo: Sanjuanito en 2/4, con carácter alegre y festivo\n- Combinación de escritura vertical (acordes plenos) y escritura contrapuntística\n- Uso de texturas mixtas: acompañamiento tipo stride, bloques verticales, arpegios extendidos, y polifonía melódica\n- Reexposición y variación temática con cierre enfático",
+                didacticApplication: "- Obra ideal para trabajar cambios de textura y articulación en contextos contrastantes\n- Favorece la comprensión del sanjuanito como forma estilizada dentro del repertorio académico\n- Enriquece la interpretación del repertorio nacionalista desde una aproximación técnica y cultural rigurosa\n- Muy útil para estudios avanzados de acompañamiento tipo stride y control de acordes en bloque"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Siga la farra",
+                genre: "Aire Típico",
+                compass: "6/8",
+                tempo: "Allegro con brio",
+                tonality: "F# minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Coordinación entre melodías y arpegios extendidos\n- Acordes en bloque que requieren control sonoro y fuerza expresiva\n- Escalas pentáfonas en pasajes virtuosos\n- Octavas melódicas en RH para reforzar el carácter enérgico\n- Control estructural de una forma extensa con múltiples motivos independientes",
+                musicalResources: "- Forma: Estribillo - A - B - C - Puente - D - E - Estribillo - A - B1 - Coda\n- Compás de 6/8 en estilo aire típico, con carácter festivo y brillante\n- Motivos temáticos variados y contrastantes\n- Melodía acompañada, arpegios, acordes plenos, y octavas en la mano derecha\n- Uso de escalas pentafónicas como recurso expresivo y técnico\n- Retomada del estribillo con variaciones en la parte final",
+                didacticApplication: "- Obra excelente para consolidar el dominio del repertorio nacionalista con visión pianística de concierto\n- Desarrolla capacidades de interpretación narrativa, análisis formal y expresión dinámica\n- Ideal para trabajar la transición entre secciones contrastantes dentro de una misma obra\n- Aporta gran valor al estudio de la estilización folclórica con recursos románticos y modernos aplicados al piano ecuatoriano"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Rapsodia Aborigen N.º 1",
+                genre: "Rapsodia",
+                compass: "No especificado",
+                tempo: "Andante sostenuto",
+                tonality: "Eb minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Acordes permutados a gran velocidad en ambas manos\n- Coordinación rítmica compleja entre melodía y acompañamiento en múltiples compases y estilos\n- Cambios de carácter, tempo y ritmo entre secciones\n- Melodías armonizadas con terceras, cuartas y sextas\n- Control dinámico y estructural para sostener el discurso a lo largo de toda la rapsodia",
+                musicalResources: "- Forma libre basada en la sucesión de ritmos ecuatorianos: danzante, sanjuanito, albazo y tonada\n- Escritura pianística densa con texturas homofónicas, acordes, arpegios y permutaciones\n- Acompañamientos rítmicos estilizados según cada danza\n- Amplio rango dinámico, cromatismo, modulaciones y uso de intervalos característicos\n- Coda lírica (tonada) que contrasta con el carácter rítmico anterior",
+                didacticApplication: "- Obra ideal para integrar lo técnico y lo expresivo en repertorio nacionalista avanzado\n- Fomenta el reconocimiento y análisis comparativo de ritmos ecuatorianos estilizados\n- Desarrolla independencia de manos, lectura armónica compleja y control tímbrico\n- Permite profundizar en la construcción formal libre, pero cohesionada a través de elementos rítmicos y motívicos, propios de la rapsodia folclórica"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Rapsodia 2",
+                genre: "Rapsodia",
+                compass: "No especificado",
+                tempo: "No especificado",
+                tonality: "G minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Block chords en melodías que requieren control dinámico y precisión vertical\n- Escalas virtuosas a gran velocidad\n- Puentes modulatorios complejos\n- Sanjuanitos con contrapunto (requiere independencia y claridad de voces)\n- Cambios frecuentes de carácter y ritmo (capishca, pasillo, alza, yumbo, etc.)",
+                musicalResources: "- Forma rapsódica extensa con una sucesión de danzas nacionales ecuatorianas\n- Combinación de texturas: bloques armónicos, contrapunto, arpegios y escalas\n- Amplia variedad rítmica y de métricas, desde ternarios rápidos (capishca, alza) hasta secciones líricas (yaraví)\n- Modulación frecuente como elemento de conexión y contraste\n- Coda conclusiva con recuperación de temas anteriores",
+                didacticApplication: "- Ideal para estudiar la construcción de un discurso musical basado en la alternancia rítmica ecuatoriana\n- Desarrolla versatilidad técnica y expresiva\n- Permite un análisis formal profundo de una forma libre con lógica interna a través de ritmos y motivos\n- Enriquece el repertorio pianístico nacional con una obra de carácter sinfónico y pianismo de concierto basado en raíces tradicionales"
+            },
+            {
+                composer: "Luis Humberto Salgado",
+                title: "Rapsodia 3",
+                genre: "Rapsodia",
+                compass: "No especificado",
+                tempo: "No especificado",
+                tonality: "E minor",
+                level: "3.º de Bachillerato",
+                technicalDifficulties: "- Arpegios extendidos y pasajes virtuosos\n- Alternancia fluida de texturas y estilos (homofonía, polifonía, contrapunto)\n- Control expresivo de articulaciones (legato–staccato)\n- Diferenciación de planos sonoros y construcción formal libre\n- Ornamentaciones estilizadas y dinámicas contrastantes",
+                musicalResources: "- Forma libre basada en la progresión de ritmos nacionales: Yaraví (introversión), Albazo (energía), Aire típico (color local), Sanjuanito (final contrapuntístico)\n- Texturas contrastantes: acordes en bloque, polifonía melódica, acompañamientos modales\n- Uso de escalas pentafónicas, armonías propias del nacionalismo ecuatoriano\n- Puentes virtuosísticos como recursos de conexión formal y clímax técnico",
+                didacticApplication: "- Culmina el proceso formativo del estudiante consolidando aspectos técnicos y musicales abordados en obras anteriores\n- Favorece el análisis auditivo, formal y expresivo de repertorio estilizado desde lo folclórico\n- Ideal para trabajar lectura avanzada, planificación interpretativa y dominio del repertorio ecuatoriano de concierto\n- Refuerza la identidad musical mediante una síntesis pianística de los géneros nacionales y una proyección artística de alta exigencia"
+            },
+
+            // Obras de Carlos Bonilla
+            {
+                composer: "Carlos Bonilla",
+                title: "Beatriz",
+                genre: "Pasillo",
+                compass: "No especificado",
+                tempo: "Rápido (♩=176)",
+                tonality: "E minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Control del tempo rápido (♩=176)\n- Lectura fluida de texturas mixtas y cambiantes\n- Independencia de manos (melodía en el bajo)\n- Equilibrio dinámico entre voces internas y la melodía",
+                musicalResources: "- Forma tripartita no convencional (A-B-C)\n- Tema A: polifonía en Mi menor\n- Tema B: melodía en la mano izquierda con acordes en la derecha\n- Tema C: modulación a Mi mayor con texturas mixtas",
+                didacticApplication: "- Ideal para explorar estructuras formales alternativas dentro del pasillo ecuatoriano\n- Trabaja la lectura avanzada y el control técnico en contextos rápidos\n- Fomenta una interpretación articulada, clara y estilísticamente más ligera que el pasillo introspectivo tradicional"
+            },
+            {
+                composer: "Carlos Bonilla",
+                title: "Calamaca",
+                genre: "Aire Típico",
+                compass: "3/4",
+                tempo: "Allegro (♩=176)",
+                tonality: "E minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Tempo rápido (♩=176) que requiere agilidad básica\n- Texturas variadas (octavas, acordes simples)\n- Uso moderado de ornamentaciones\n- Independencia de manos",
+                musicalResources: "- Aire típico en 3/4\n- Forma rondó: ABA1CA2D D.C. A\n- Variaciones temáticas mediante texturas: monofonía en octavas, homofonía, contrapunto básico\n- Modulación a la menor",
+                didacticApplication: "- Introducción a la forma rondó y comprensión estructural\n- Desarrollo del control dinámico en cambios de textura\n- Trabajo sobre ornamentaciones y expresividad\n- Refuerzo de identidad cultural mediante un aire tradicional estilizado"
+            },
+            {
+                composer: "Carlos Bonilla",
+                title: "Esperame",
+                genre: "Yaraví",
+                compass: "6/8",
+                tempo: "Lento",
+                tonality: "E minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Control de tempo lento en 6/8 con expresividad sostenida\n- Homofonía a dos voces en la mano derecha (requiere precisión de balance)\n- Cambio de tempo en la sección C (Allegro)\n- Coordinación entre ritmo característico del yaraví y acompañamiento",
+                musicalResources: "- Forma rondó: A – B – C (Allegro) – A1 – B1\n- Compás de 6/8 (Yaraví lento) y aire típico allegro (contraste rítmico)\n- Melodía armonizada en homofonía (dos voces en MD)\n- Estilo nacionalista con fuerte raíz tradicional",
+                didacticApplication: "- Introducción al Yaraví ecuatoriano y sus características expresivas\n- Trabajo de equilibrio sonoro en textura homofónica\n- Comprensión de formas con contrastes internos (lírico vs rítmico)\n- Desarrollo de sensibilidad estilística e identidad cultural"
+            },
+            {
+                composer: "Carlos Bonilla",
+                title: "Indiecito Otavaleño",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "No especificado",
+                tonality: "E minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Independencia de manos\n- Lectura precisa de acordes en terceras\n- Coordinación de ritmo ternario sobre binario (sutileza en el acompañamiento de sanjuanito)\n- Dinámica estable y control del fraseo melódico",
+                musicalResources: "- Melodía acompañada\n- Uso de intervalos de terceras en la mano derecha\n- Acordes básicos i - III - V7\n- Forma rondó con estribillo recurrente\n- Ritmo característico del sanjuanito en 2/4",
+                didacticApplication: "- Favorece la comprensión del ritmo nacional del sanjuanito y su estructura formal repetitiva\n- Permite trabajar la homogeneización del sonido en las terceras\n- Aporta a la apreciación del estilo indígena-otavaleño desde un enfoque técnico y expresivo\n- Posibilita abordar elementos de análisis formal, auditivo y cultural (introducción a la identidad musical nacional)"
+            },
+            {
+                composer: "Carlos Bonilla",
+                title: "La del estribo",
+                genre: "Aire Típico",
+                compass: "¾",
+                tempo: "Presto (♩=176)",
+                tonality: "A minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Tempo rápido (Presto ♩=176)\n- Coordinación precisa entre melodía en terceras y arpegios contrapuntísticos\n- Articulación limpia y clara\n- Resistencia y control físico por la velocidad sostenida",
+                musicalResources: "- Melodía acompañada con terceras en mano derecha\n- Acompañamiento con arpegios en mano izquierda\n- Recursos contrapuntísticos (imitaciones, voces cruzadas)\n- Forma ternaria con coda\n- Compás de 3/4 en estilo de aire típico",
+                didacticApplication: "- Ideal para trabajar velocidad y precisión en pasajes acompañados\n- Desarrollo del sentido polifónico y control técnico entre ambas manos\n- Introduce el estilo del aire típico con una estética más viva y festiva\n- Relevante para el análisis formal, contraste temático y apreciación del lenguaje nacional ecuatoriano en contextos más avanzados"
+            },
+            {
+                composer: "Carlos Bonilla",
+                title: "Quiteñitas",
+                genre: "Aire Típico",
+                compass: "¾",
+                tempo: "Allegro moderato",
+                tonality: "E minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Alternancia entre texturas (polifonía, arpegios, acordes plenos)\n- Control del fraseo y del equilibrio entre voces\n- Precisión en bloques armónicos\n- Coordinación de manos en pasajes con escritura densa",
+                musicalResources: "- Melodía acompañada con recursos polifónicos y arpegios\n- Uso de acordes completos (block chords) como parte del discurso melódico\n- Forma compuesta (A-B-Estribillo-C-A)\n- Compás de 3/4, estilo aire típico en Allegro moderato",
+                didacticApplication: "- Permite trabajar la transición fluida entre distintas texturas pianísticas\n- Desarrolla el sentido armónico y la atención a la verticalidad sonora\n- Aporta a la construcción de una interpretación estilísticamente coherente con el aire tradicional quiteño\n- Ideal para ejercicios de análisis formal y de articulación de contrastes temáticos"
+            },
+            {
+                composer: "Carlos Bonilla",
+                title: "Soledad de Madre",
+                genre: "Yumbo",
+                compass: "6/8",
+                tempo: "Lento",
+                tonality: "F# Minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Sostener acordes con control dinámico y expresivo\n- Equilibrar la melodía armonizada con acordes\n- Estabilidad rítmica en el patrón característico del yumbo\n- Sonoridad cálida y homogénea en acordes verticales",
+                musicalResources: "- Forma tipo rondó con estribillo recurrente\n- Melodía en la mano derecha armonizada con acordes\n- Acompañamiento con ritmo característico del yumbo (compás ternario lento)\n- Armonía en F♯ menor con progresiones sencillas pero expresivas",
+                didacticApplication: "- Excelente para desarrollar el control del sonido en acordes\n- Introduce al alumno en los géneros amazónico-ecuatoriano como el yumbo\n- Posibilita trabajar fraseo expresivo, balance y coordinación entre manos\n- Ideal para integrar actividades de análisis cultural, rítmico y auditivo contextualizado en los géneros nacionales"
+            },
+            {
+                composer: "Carlos Bonilla",
+                title: "Tres Capullitos",
+                genre: "Pasillo",
+                compass: "¾",
+                tempo: "Lento (♩=60), moderato (♩=92), allegro (♩=132)",
+                tonality: "E minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Coordinación entre ritmo característico del pasillo en la mano izquierda y melodía con intervalos (terceras y sextas) en la derecha\n- Transiciones de tempo: lento (♩=60), moderato (♩=92), allegro (♩=132)\n- Precisión rítmica y expresiva\n- Control dinámico en arpegios acompañantes del tema C",
+                musicalResources: "- Forma compleja con repetición de introducción\n- Alternancia de texturas: melodía armonizada (terceras/sextas) y acompañamiento arpegiado\n- Uso del ritmo característico del pasillo ecuatoriano en compás de 3/4\n- Cambios de tempo estructurales (no sólo expresivos) como recurso expresivo y narrativo",
+                didacticApplication: "- Ideal para abordar la interpretación estilística del pasillo desde una visión moderna y expresiva\n- Posibilita el trabajo integral de texturas, tempo y control sonoro\n- Ofrece oportunidades para la comprensión formal avanzada y la interpretación con cambios afectivos\n- Promueve el desarrollo de una técnica pianística flexible, con foco en articulación, fraseo y narratividad musical"
+            },
+            {
+                composer: "Carlos Bonilla",
+                title: "Ximena",
+                genre: "Pasillo",
+                compass: "¾",
+                tempo: "Lento (♩=66) a Allegro",
+                tonality: "A minor",
+                level: "2.º de Bachillerato",
+                technicalDifficulties: "- Coordinación entre melodía armonizada en terceras/sextas y acompañamiento rítmico típico del pasillo\n- Transición clara y expresiva entre tempo lento y sección rápida\n- Control dinámico y equilibrio entre manos\n- Técnica de acordes ligados y expresión melódica en compás ternario",
+                musicalResources: "- Melodía armonizada con intervalos (terceras y sextas)\n- Acompañamiento rítmico típico del pasillo en 3/4\n- Cambio de tempo en la sección C (de ♩=66 a Allegro)\n- Forma extendida con repetición y variedad temática: Intro - a - B - C - Intro - A - B - C",
+                didacticApplication: "- Excelente para trabajar la sensibilidad expresiva del pasillo ecuatoriano\n- Introduce al alumno en formas extensas con repeticiones variadas\n- Brinda una plataforma para afianzar la técnica de acordes armónicos y control del tempo\n- Aporta a la interpretación del repertorio nacional desde un enfoque estilístico y técnico equilibrado"
+            },
+
+            // Obras de Salvador Bustamante Celi
+            {
+                composer: "Salvador Bustamante Celi",
+                title: "Sanjuan 1",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "Allegro Moderato",
+                tonality: "A minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Coordinación rítmica con acompañamiento tipo stride en compás de 2/4\n- Ejecución limpia de apoyaturas y mordentes\n- Melodía armonizada en terceras con precisión y control del fraseo",
+                musicalResources: "- Forma clara: Introducción – Sección A – Sección B – Coda\n- Acompañamiento tipo stride con armonía funcional (I – V7 – III)\n- Melodía con intervalos de terceras y adornos típicos (apoyaturas, mordentes)\n- Ritmo característico del sanjuanito andino",
+                didacticApplication: "- Obra ideal para introducir al alumno al repertorio nacional ecuatoriano desde lo técnico y estilístico\n- Posibilita el desarrollo del sentido rítmico tradicional y la interpretación expresiva a través de pequeños adornos\n- Facilita el análisis formal simple y el reconocimiento de progresiones armónicas típicas del repertorio popular estilizado"
+            },
+            {
+                composer: "Salvador Bustamante Celi",
+                title: "Sanjuan 2 (Viva Quito)",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "Allegro Moderato",
+                tonality: "E minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Introducción con homofonía en octavas (control de ataque y sonoridad)\n- Coordinación de stride simplificado\n- Cambios de registro en la melodía (medio a agudo)",
+                musicalResources: "- Forma seccional: Intro – A – B – C – B\n- Introducción homofónica en octavas (refuerzo tímbrico inicial)\n- Melodía simple con acompañamiento rítmico constante en LH\n- Empleo de registros diferenciados (medio y agudo) para crear variedad tímbrica\n- Compás binario con ritmo tradicional del sanjuanito",
+                didacticApplication: "- Ideal para trabajar contrastes de registro y articulación melódica\n- Refuerza la comprensión de formas repetitivas y organización temática\n- Introduce elementos de identidad nacional mediante un estilo accesible y alegre\n- Fortalece la expresividad a través del uso tímbrico del teclado y patrones rítmicos tradicionales"
+            },
+            {
+                composer: "Salvador Bustamante Celi",
+                title: "Sanjuan 3",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "Allegro Moderato",
+                tonality: "D minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Coordinación con acompañamiento tipo stride en partes A y B\n- Cambio de rol: melodía en la mano izquierda (parte C)\n- Contratiempos en la mano derecha\n- Coda con arpegios progresivos en posición de cinco dedos",
+                musicalResources: "- Forma seccional: Intro – A – B – C – Coda\n- Acompañamiento rítmico tipo stride en LH\n- Intercambio de roles melódico-armónicos entre manos\n- Contratiempos y arpegios como recursos expresivos accesibles\n- Uso progresivo del registro para reforzar la direccionalidad musical",
+                didacticApplication: "- Introduce estructuras claras y motívicas\n- Desarrolla coordinación rítmica entre manos\n- Favorece la lectura de texturas alternadas y el trabajo con patrones básicos\n- Integra elementos técnicos simples con identidad rítmica nacional"
+            },
+            {
+                composer: "Salvador Bustamante Celi",
+                title: "Sanjuan 4",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "Allegro Moderato",
+                tonality: "F minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Homofonía densa en el estribillo (control de acordes y balance sonoro)\n- Coordinación de stride simplificado\n- Melodía armonizada en terceras en parte C",
+                musicalResources: "- Forma cíclica: Estribillo – A – Estribillo – B – Estribillo – C – Estribillo\n- Textura homofónica con bloques armónicos en el estribillo\n- Melodías pentafónicas en A y B\n- Parte C con armonización en terceras en RH\n- Acompañamiento rítmico constante tipo stride en LH",
+                didacticApplication: "- Refuerza la memorización estructural a través de la repetición\n- Desarrolla claridad en la articulación de acordes y melodías simples\n- Introduce variedad tímbrica y armónica dentro de un estilo tradicional\n- Facilita el vínculo técnico-musical con la danza nacional del sanjuanito"
+            },
+            {
+                composer: "Salvador Bustamante Celi",
+                title: "Sanjuan 5",
+                genre: "Sanjuanito",
+                compass: "2/4",
+                tempo: "Allegro Moderato",
+                tonality: "D minor",
+                level: "1.º de Bachillerato",
+                technicalDifficulties: "- Acordes rítmicos en el estribillo (control de ataque y tiempo)\n- Acompañamiento tipo stride en partes A y B\n- Melodía armonizada en terceras\n- Recursos contrapuntísticos en C y D\n- Arpegios en posición fija de cinco dedos en RH",
+                musicalResources: "- Forma cíclica con estribillo intercalado: Estribillo – A – Estribillo – B – Estribillo – C – Estribillo – D\n- Estribillo con acordes rítmicos en bloque\n- Parte A con melodía simple y stride básico en LH\n- Parte B con melodía armonizada en terceras\n- Secciones C y D introducen texturas contrapuntísticas y arpegios progresivos en cinco dedos en RH",
+                didacticApplication: "- Integra gradualmente recursos técnicos más avanzados en un entorno pedagógico accesible\n- Refuerza la articulación de acordes, la independencia de manos y el reconocimiento de texturas\n- Estimula la comprensión estructural por repetición temática clara\n- Es ideal como transición hacia obras de mayor complejidad técnica en cursos superiores, manteniendo la identidad rítmica del sanjuanito ecuatoriano"
+            }
+        ];
+
+        // Variables para los gráficos
+        let difficultyChartInstance = null;
+        let genreChartInstance = null;
+
+        /**
+         * Genera el HTML para una tarjeta de obra musical.
+         * @param {Object} piece - Objeto que representa una obra musical.
+         * @param {number} index - Índice de la pieza en el array, usado para un ID único.
+         * @returns {string} HTML de la tarjeta.
+         */
+        function createPieceCardHtml(piece, index) {
+            return `
+                <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">${piece.title}</h3>
+                        <p class="text-sm text-gray-600 mb-1"><span class="font-medium">Compositor:</span> ${piece.composer}</p>
+                        <p class="text-sm text-gray-600 mb-1"><span class="font-medium">Género:</span> ${piece.genre}</p>
+                        <p class="text-sm text-gray-600 mb-1"><span class="font-medium">Nivel:</span> ${piece.level}</p>
+                        <p class="text-sm text-gray-600 mb-4"><span class="font-medium">Tonalidad:</span> ${piece.tonality}</p>
+
+                        <div id="details-${index}" class="hidden mt-4 border-t border-gray-200 pt-4">
+                            <p class="text-base font-semibold text-gray-700 mb-2">Dificultades Técnicas:</p>
+                            <ul class="list-disc list-inside text-gray-700 text-sm mb-4">
+                                ${piece.technicalDifficulties.split('\n').map(item => item.trim() ? `<li>${item.trim().replace(/^- /, '')}</li>` : '').join('')}
+                            </ul>
+
+                            <p class="text-base font-semibold text-gray-700 mb-2">Recursos Musicales:</p>
+                            <ul class="list-disc list-inside text-gray-700 text-sm mb-4">
+                                ${piece.musicalResources.split('\n').map(item => item.trim() ? `<li>${item.trim().replace(/^- /, '')}</li>` : '').join('')}
+                            </ul>
+
+                            <p class="text-base font-semibold text-gray-700 mb-2">Aplicación Didáctica:</p>
+                            <ul class="list-disc list-inside text-gray-700 text-sm">
+                                ${piece.didacticApplication.split('\n').map(item => item.trim() ? `<li>${item.trim().replace(/^- /, '')}</li>` : '').join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    <button
+                        data-index="${index}"
+                        class="toggle-details-btn w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-b-xl flex items-center justify-center space-x-2 hover:bg-gray-200 transition-colors duration-200 font-medium text-sm"
+                    >
+                        <span>Ver análisis</span>
+                        <!-- Ícono de Chevron Down (SVG) -->
+                        <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                </div>
+            `;
+        }
+
+        /**
+         * Renderiza las tarjetas de obras musicales en el contenedor.
+         * @param {Array<Object>} works - Array de obras a renderizar.
+         */
+        function renderWorks(works) {
+            const worksContainer = document.getElementById('works-container');
+            worksContainer.innerHTML = ''; // Limpiar contenedor
+            const filteredWorksTitle = document.getElementById('filtered-works-title');
+            filteredWorksTitle.textContent = `Obras Encontradas (${works.length})`;
+
+            if (works.length === 0) {
+                worksContainer.innerHTML = '<p class="text-gray-600 text-lg text-center py-8 col-span-full">No se encontraron obras con los filtros seleccionados.</p>';
+                return;
+            }
+
+            works.forEach((piece, index) => {
+                worksContainer.insertAdjacentHTML('beforeend', createPieceCardHtml(piece, index));
+            });
+
+            // Añadir event listeners a los botones de expandir/contraer
+            document.querySelectorAll('.toggle-details-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const index = event.currentTarget.dataset.index;
+                    const detailsDiv = document.getElementById(`details-${index}`);
+                    const chevronIcon = event.currentTarget.querySelector('.chevron-icon');
+
+                    detailsDiv.classList.toggle('hidden');
+                    if (detailsDiv.classList.contains('hidden')) {
+                        event.currentTarget.querySelector('span').textContent = 'Ver análisis';
+                        chevronIcon.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>'; // Chevron Down
+                    } else {
+                        event.currentTarget.querySelector('span').textContent = 'Ver menos';
+                        chevronIcon.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>'; // Chevron Up
+                    }
+                });
+            });
+        }
+
+        /**
+         * Inicializa y actualiza los gráficos Chart.js.
+         * @param {Array<Object>} data - Datos filtrados para los gráficos.
+         */
+        function renderCharts(data) {
+            // Datos para el gráfico de dificultad (Dona)
+            const difficultyCounts = data.reduce((acc, piece) => {
+                acc[piece.level] = (acc[piece.level] || 0) + 1;
+                return acc;
+            }, {});
+            const difficultyLabels = Object.keys(difficultyCounts).sort();
+            const difficultyData = difficultyLabels.map(label => difficultyCounts[label]);
+
+            // Datos para el gráfico de género (Barras)
+            const genreCounts = data.reduce((acc, piece) => {
+                const genres = piece.genre.split(' y ');
+                genres.forEach(g => {
+                    const normalizedGenre = g.trim();
+                    if (normalizedGenre !== "Rapsodia") {
+                        acc[normalizedGenre] = (acc[normalizedGenre] || 0) + 1;
+                    }
+                });
+                return acc;
+            }, {});
+            const genreLabels = Object.keys(genreCounts).sort();
+            const genreData = genreLabels.map(label => genreCounts[label]);
+
+            // Destruir instancias de gráficos anteriores si existen
+            if (difficultyChartInstance) {
+                difficultyChartInstance.destroy();
+            }
+            if (genreChartInstance) {
+                genreChartInstance.destroy();
+            }
+
+            // Crear gráfico de dificultad
+            const difficultyCtx = document.getElementById('difficultyChart').getContext('2d');
+            difficultyChartInstance = new Chart(difficultyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: difficultyLabels,
+                    datasets: [{
+                        label: 'Obras por Nivel de Dificultad',
+                        data: difficultyData,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución de Obras por Nivel de Dificultad',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: '#374151'
+                        }
+                    }
+                }
+            });
+
+            // Crear gráfico de género
+            const genreCtx = document.getElementById('genreChart').getContext('2d');
+            genreChartInstance = new Chart(genreCtx, {
+                type: 'bar',
+                data: {
+                    labels: genreLabels,
+                    datasets: [{
+                        label: 'Frecuencia de Géneros Musicales',
+                        data: genreData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Frecuencia de Géneros Musicales',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            color: '#374151'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * Aplica los filtros a la lista completa de obras y actualiza la UI.
+         */
+        function applyFilters() {
+            const selectedComposer = document.getElementById('composer-filter').value;
+            const selectedLevel = document.getElementById('level-filter').value;
+            const selectedGenre = document.getElementById('genre-filter').value;
+
+            const filteredWorks = ALL_WORKS.filter(piece => {
+                const matchesComposer = selectedComposer === 'Todos' || piece.composer === selectedComposer;
+                const matchesLevel = selectedLevel === 'Todos' || piece.level === selectedLevel;
+                const matchesGenre = selectedGenre === 'Todos' || piece.genre.includes(selectedGenre);
+                return matchesComposer && matchesLevel && matchesGenre;
+            });
+
+            renderWorks(filteredWorks);
+            renderCharts(filteredWorks);
+        }
+
+        /**
+         * Inicializa los filtros con opciones únicas extraídas de los datos.
+         */
+        function initializeFilters() {
+            const uniqueComposers = [...new Set(ALL_WORKS.map(piece => piece.composer))].sort();
+            const uniqueLevels = [...new Set(ALL_WORKS.map(piece => piece.level))].sort();
+            // Filtrar "Rapsodia" de los géneros para el filtro, ya que es una categoría de obras complejas, no un género de danza individual
+            const uniqueGenres = [...new Set(ALL_WORKS.flatMap(piece => piece.genre.split(' y ').map(g => g.trim())))].filter(g => g !== "Rapsodia").sort();
+
+            const composerFilter = document.getElementById('composer-filter');
+            uniqueComposers.forEach(composer => {
+                const option = document.createElement('option');
+                option.value = composer;
+                option.textContent = composer;
+                composerFilter.appendChild(option);
+            });
+
+            const levelFilter = document.getElementById('level-filter');
+            uniqueLevels.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level;
+                option.textContent = level;
+                levelFilter.appendChild(option);
+            });
+
+            const genreFilter = document.getElementById('genre-filter');
+            uniqueGenres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre;
+                option.textContent = genre;
+                genreFilter.appendChild(option);
+            });
+
+            // Añadir event listeners a los filtros
+            composerFilter.addEventListener('change', applyFilters);
+            levelFilter.addEventListener('change', applyFilters);
+            genreFilter.addEventListener('change', applyFilters);
+        }
+
+        // Ejecutar funciones al cargar el DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFilters();
+            applyFilters(); // Renderizar las obras y gráficos iniciales
+        });
+    </script>
+</body>
+</html>
